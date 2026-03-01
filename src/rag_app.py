@@ -1,8 +1,8 @@
-# src/rag_app.py
 import os
 from llama_index.core import VectorStoreIndex, Document, Settings
 from llama_index.vector_stores.chroma import ChromaVectorStore
-from llama_index.llms.huggingface_api import HuggingFaceAPI
+# ✅ Исправленные импорты
+from llama_index.llms.huggingface_api import HuggingFaceInferenceAPI
 from llama_index.embeddings.huggingface_api import HuggingFaceEmbedding
 import chromadb
 
@@ -12,17 +12,16 @@ def get_llm_and_embedder():
     if not hf_token:
         raise ValueError("HF_TOKEN не найден в переменных окружения")
 
-    # ✅ Исправленные классы для новых версий llama-index
-    llm = HuggingFaceAPI(
-        api_key=hf_token,
+    llm = HuggingFaceInferenceAPI(
         model_name="mistralai/Mistral-7B-Instruct-v0.3",
+        token=hf_token,
         temperature=0.1,
         max_new_tokens=512
     )
 
     embed_model = HuggingFaceEmbedding(
-        api_key=hf_token,
-        model_name="sentence-transformers/all-MiniLM-L6-v2"
+        model_name="sentence-transformers/all-MiniLM-L6-v2",
+        token=hf_token
     )
 
     Settings.llm = llm
@@ -33,17 +32,14 @@ def get_llm_and_embedder():
 def build_rag_engine(data_path="src/data.txt"):
     llm, embed_model = get_llm_and_embedder()
 
-    # Ephemeral Chroma для тестов
     chroma_client = chromadb.EphemeralClient()
     chroma_collection = chroma_client.create_collection("rag_collection")
     vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
 
-    # Загрузка документа
     with open(data_path, "r", encoding="utf-8") as f:
         text = f.read()
     documents = [Document(text=text)]
 
-    # Создание индекса
     index = VectorStoreIndex.from_documents(
         documents,
         vector_store=vector_store,

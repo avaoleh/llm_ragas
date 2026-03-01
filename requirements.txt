@@ -10,3 +10,4 @@ pytest
 python-dotenv
 pandas
 jinja2
+python-dotenv

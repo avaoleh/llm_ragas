@@ -8,7 +8,7 @@ on:
 
 jobs:
   test-rag-quality:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # ✅ Используйте Linux, чтобы избежать проблем с компиляцией C++
 
     steps:
     - name: Checkout code
@@ -17,7 +17,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
+        python-version: '3.10'  # ✅ Стабильная версия
 
     - name: Install dependencies
       run: |
@@ -33,7 +33,7 @@ jobs:
       run: |
         cat > pytest.ini << EOF
         [pytest]
-        pythonpath = src .
+        pythonpath = .
         testpaths = tests
         python_files = test_*.py
         addopts = -v --tb=short
@@ -45,8 +45,9 @@ jobs:
     - name: Run Ragas Tests
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        PYTHONPATH: ${{ github.workspace }}
       run: |
+        pwd
+        ls -la src/ tests/
         pytest tests/test_ragas_eval.py -v -s --tb=short
 
     - name: Upload Ragas Results
