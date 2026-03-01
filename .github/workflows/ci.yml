@@ -12,10 +12,10 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4 
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.10'
 
@@ -31,8 +31,9 @@ jobs:
         pytest tests/test_ragas_eval.py -v -s --tb=short
 
     - name: Upload Ragas Results
-      if: always() # Загрузить результаты даже если тесты упали
-      uses: actions/upload-artifact@v3
+      if: always()
+      uses: actions/upload-artifact@v4
       with:
         name: ragas-evaluation-report
         path: ragas_results.json
+        retention-days: 7
