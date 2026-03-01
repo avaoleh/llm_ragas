@@ -12,7 +12,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4 
+      uses: actions/checkout@v4
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -24,9 +24,28 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Create __init__.py files
+      run: |
+        touch src/__init__.py
+        touch tests/__init__.py
+
+    - name: Create pytest.ini
+      run: |
+        cat > pytest.ini << EOF
+        [pytest]
+        pythonpath = src .
+        testpaths = tests
+        python_files = test_*.py
+        addopts = -v --tb=short
+        EOF
+
+    - name: Set PYTHONPATH
+      run: echo "PYTHONPATH=${{ github.workspace }}" >> $GITHUB_ENV
+
     - name: Run Ragas Tests
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        PYTHONPATH: ${{ github.workspace }}
       run: |
         pytest tests/test_ragas_eval.py -v -s --tb=short
 
