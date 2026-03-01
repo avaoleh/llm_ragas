@@ -3,7 +3,7 @@ from llama_index.core import VectorStoreIndex, Document, Settings
 from llama_index.vector_stores.chroma import ChromaVectorStore
 # ✅ ПРАВИЛЬНЫЕ ИМЕНА КЛАССОВ
 from llama_index.llms.huggingface_api import HuggingFaceInferenceAPI
-from llama_index.embeddings.huggingface_api import HuggingFaceAPIEmbedding
+from llama_index.embeddings.huggingface_api import HuggingFaceEmbedding
 import chromadb
 
 
