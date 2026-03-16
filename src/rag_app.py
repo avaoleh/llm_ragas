@@ -80,9 +80,9 @@ def get_llm_and_embedder():
         raise ValueError("HF_TOKEN не найден в переменных окружения")
 
     print("🌐 Использование LLM через Hugging Face Inference API...")
-    # Используем поддерживаемую модель для чата
+    # Используем модель, которая точно поддерживается
     llm = HuggingFaceInferenceAPI(
-        model_name="microsoft/Phi-3-mini-4k-instruct",  # ✅ Поддерживаемая модель
+        model_name="HuggingFaceH4/zephyr-7b-beta",  # ✅ Поддерживаемая модель
         token=hf_token,
         temperature=0.1,
         max_new_tokens=512,
