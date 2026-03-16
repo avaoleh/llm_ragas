@@ -1,9 +1,8 @@
 import os
 from llama_index.core import VectorStoreIndex, Document, Settings
 from llama_index.vector_stores.chroma import ChromaVectorStore
-# ✅ ПРАВИЛЬНЫЕ ИМЕНА КЛАССОВ
 from llama_index.llms.huggingface_api import HuggingFaceInferenceAPI
-from llama_index.embeddings.huggingface_api import HuggingFaceEmbedding
+from llama_index.embeddings.huggingface_api import HuggingFaceInferenceAPIEmbedding
 import chromadb
 
 
@@ -21,8 +20,8 @@ def get_llm_and_embedder():
         max_new_tokens=512
     )
 
-    # ✅ Embeddings модель (ПРАВИЛЬНОЕ ИМЯ: HuggingFaceAPIEmbedding)
-    embed_model = HuggingFaceAPIEmbedding(
+    # ✅ Правильный класс для эмбеддингов через Inference API
+    embed_model = HuggingFaceInferenceAPIEmbedding(
         model_name="sentence-transformers/all-MiniLM-L6-v2",
         token=hf_token
     )
