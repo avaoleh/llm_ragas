@@ -11,6 +11,8 @@ from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 
 import chromadb
 
+import nest_asyncio
+nest_asyncio.apply() 
 
 def get_llm_and_embedder():
     """
