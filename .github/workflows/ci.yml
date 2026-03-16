@@ -45,7 +45,8 @@ jobs:
     - name: Run Ragas Tests
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        USE_LOCAL_EMBEDDINGS: "true"  # ✅ Включаем локальные эмбеддинги для тестов
+        USE_LOCAL_LLM: "true"
+        USE_LOCAL_EMBEDDINGS: "true"
       run: |
         pwd
         ls -la src/ tests/

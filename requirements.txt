@@ -12,4 +12,6 @@ python-dotenv
 pandas
 jinja2
 python-dotenv
-llama-index-embeddings-huggingface-api
+llama-index-llms-huggingface-local
+accelerate
+bitsandbytes
