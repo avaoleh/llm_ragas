@@ -1,19 +1,21 @@
 import os
-import nest_asyncio
 from llama_index.core import VectorStoreIndex, Document, Settings
 from llama_index.vector_stores.chroma import ChromaVectorStore
+
 from llama_index.llms.huggingface_api import HuggingFaceInferenceAPI
 from llama_index.embeddings.huggingface_api import HuggingFaceInferenceAPIEmbedding
-import chromadb
+# ✅ Импорт локальных эмбеддингов
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 
-# Применяем nest_asyncio для возможности вложенных event loops
-nest_asyncio.apply()
+import chromadb
 
 
 def get_llm_and_embedder():
-    """Инициализация LLM и эмбеддингов через Hugging Face Inference API."""
+    """Инициализация LLM и эмбеддингов."""
     hf_token = os.getenv("HF_TOKEN")
-    if not hf_token:
+    use_local_embeddings = os.getenv("USE_LOCAL_EMBEDDINGS", "false").lower() == "true"
+
+    if not hf_token and not use_local_embeddings:
         raise ValueError("HF_TOKEN не найден в переменных окружения")
 
     # ✅ LLM через Inference API
@@ -24,11 +26,17 @@ def get_llm_and_embedder():
         max_new_tokens=512
     )
 
-    # ✅ Правильный класс для эмбеддингов через Inference API
-    embed_model = HuggingFaceInferenceAPIEmbedding(
-        model_name="sentence-transformers/all-MiniLM-L6-v2",
-        token=hf_token
-    )
+    # ✅ Выбор модели эмбеддингов
+    if use_local_embeddings:
+        embed_model = HuggingFaceEmbedding(
+            model_name="sentence-transformers/all-MiniLM-L6-v2",
+            cache_folder="./cache"
+        )
+    else:
+        embed_model = HuggingFaceInferenceAPIEmbedding(
+            model_name="sentence-transformers/all-MiniLM-L6-v2",
+            token=hf_token
+        )
 
     Settings.llm = llm
     Settings.embed_model = embed_model
@@ -39,7 +47,7 @@ def build_rag_engine(data_path="src/data.txt"):
     """Строит RAG движок с ChromaDB."""
     llm, embed_model = get_llm_and_embedder()
 
-    # Ephemeral Chroma для тестов (не требует persistence)
+    # Ephemeral Chroma для тестов
     chroma_client = chromadb.EphemeralClient()
     chroma_collection = chroma_client.create_collection("rag_collection")
     vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
