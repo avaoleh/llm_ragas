@@ -82,7 +82,7 @@ def get_llm_and_embedder():
     print("🌐 Использование LLM через Hugging Face Inference API (text-generation)...")
     # Используем модель для текстовой генерации вместо чата
     llm = HuggingFaceInferenceAPI(
-        model_name="mistralai/Mistral-7B-v0.1",  # ✅ Модель для text-generation
+        model_name="google/flan-t5-large", 
         token=hf_token,
         temperature=0.1,
         max_new_tokens=512,
