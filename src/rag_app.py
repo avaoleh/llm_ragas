@@ -19,7 +19,7 @@ def get_llm_and_embedder():
     # ✅ LLM через Inference API
     print("🌐 Использование LLM через Hugging Face Inference API...")
     llm = HuggingFaceInferenceAPI(
-        model_name="mistralai/Mistral-7B-Instruct-v0.1",
+        model_name="HuggingFaceH4/zephyr-7b-beta",
         token=hf_token,
         temperature=0.1,
         max_new_tokens=512
