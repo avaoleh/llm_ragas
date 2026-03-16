@@ -1,9 +1,14 @@
 import os
+import asyncio
 from llama_index.core import VectorStoreIndex, Document, Settings
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.llms.huggingface_api import HuggingFaceInferenceAPI
-from llama_index.embeddings.huggingface_api import HuggingFaceAPIEmbedding
+from llama_index.embeddings.huggingface_api import HuggingFaceInferenceAPIEmbedding
 import chromadb
+import nest_asyncio
+
+# Применяем nest_asyncio для решения проблемы с event loop
+nest_asyncio.apply()
 
 
 def get_llm_and_embedder():
@@ -13,15 +18,17 @@ def get_llm_and_embedder():
         raise ValueError("HF_TOKEN не найден в переменных окружения")
 
     # ✅ LLM через Inference API
+    print("🌐 Использование LLM через Hugging Face Inference API...")
     llm = HuggingFaceInferenceAPI(
-        model_name="mistralai/Mistral-7B-Instruct-v0.3",
+        model_name="mistralai/Mistral-7B-Instruct-v0.1",  # Более старая, но стабильная версия
         token=hf_token,
         temperature=0.1,
         max_new_tokens=512
     )
 
-    # ✅ Embeddings модель (ПРАВИЛЬНОЕ ИМЯ: HuggingFaceAPIEmbedding)
-    embed_model = HuggingFaceAPIEmbedding(
+    # ✅ Embeddings модель через Inference API
+    print("🌐 Использование эмбеддингов через Hugging Face Inference API...")
+    embed_model = HuggingFaceInferenceAPIEmbedding(
         model_name="sentence-transformers/all-MiniLM-L6-v2",
         token=hf_token
     )
@@ -34,6 +41,13 @@ def get_llm_and_embedder():
 def build_rag_engine(data_path="src/data.txt"):
     """Строит RAG движок с ChromaDB."""
     llm, embed_model = get_llm_and_embedder()
+
+    # Убеждаемся, что есть активный event loop
+    try:
+        asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
 
     # Ephemeral Chroma для тестов (не требует persistence)
     chroma_client = chromadb.EphemeralClient()
@@ -57,4 +71,15 @@ def build_rag_engine(data_path="src/data.txt"):
 
 def get_response(query_engine, question):
     """Получает ответ и контекст от RAG системы."""
+    # Убеждаемся, что event loop не закрыт
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_closed():
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
     response = query_engine.query(question)
+    return str(response), [node.node.text for node in response.source_nodes]
