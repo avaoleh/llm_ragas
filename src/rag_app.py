@@ -1,9 +1,13 @@
 import os
+import nest_asyncio
 from llama_index.core import VectorStoreIndex, Document, Settings
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.llms.huggingface_api import HuggingFaceInferenceAPI
 from llama_index.embeddings.huggingface_api import HuggingFaceInferenceAPIEmbedding
 import chromadb
+
+# Применяем nest_asyncio для возможности вложенных event loops
+nest_asyncio.apply()
 
 
 def get_llm_and_embedder():

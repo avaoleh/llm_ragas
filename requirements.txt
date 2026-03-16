@@ -11,3 +11,4 @@ pandas
 jinja2
 python-dotenv
 llama-index-embeddings-huggingface-api
+nest_asyncio
