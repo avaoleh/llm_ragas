@@ -4,7 +4,6 @@ from llama_index.vector_stores.chroma import ChromaVectorStore
 
 # LLM импорты
 from llama_index.llms.huggingface_api import HuggingFaceInferenceAPI
-from llama_index.llms.huggingface_local import HuggingFaceLLM
 
 # Embeddings импорты
 from llama_index.embeddings.huggingface_api import HuggingFaceInferenceAPIEmbedding
