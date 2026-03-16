@@ -24,9 +24,12 @@ class SyncHuggingFaceInferenceAPIEmbedding(BaseEmbedding):
             token: Optional[str] = None,
             **kwargs: Any,
     ):
+        # Инициализируем родительский класс
         super().__init__(**kwargs)
-        self.model_name = model_name
-        self.token = token
+
+        # Сохраняем параметры как обычные атрибуты, а не поля Pydantic
+        self._model_name = model_name
+        self._token = token
         self._client = None
 
     def _get_client(self):
@@ -34,8 +37,8 @@ class SyncHuggingFaceInferenceAPIEmbedding(BaseEmbedding):
         if self._client is None:
             from huggingface_hub import InferenceClient
             self._client = InferenceClient(
-                model=self.model_name,
-                token=self.token,
+                model=self._model_name,
+                token=self._token,
             )
         return self._client
 
