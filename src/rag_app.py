@@ -18,8 +18,6 @@ def get_llm_and_embedder():
     Инициализация LLM и эмбеддингов с поддержкой переключения API/Локальные.
 
     Переменные окружения:
-    - USE_LOCAL_LLM: "true" для локальной модели, "false" для API
-    - USE_LOCAL_EMBEDDINGS: "true" для локальных эмбеддингов, "false" для API
     - HF_TOKEN: токен Hugging Face (обязателен для API режима)
     """
     hf_token = os.getenv("HF_TOKEN")
@@ -30,45 +28,25 @@ def get_llm_and_embedder():
     if not hf_token and (not use_local_llm or not use_local_embeddings):
         raise ValueError("HF_TOKEN не найден в переменных окружения (требуется для API режима)")
 
-    # ✅ Инициализация LLM
-    if use_local_llm:
-        print("🔄 Использование локальной LLM для тестов...")
-        llm = HuggingFaceLLM(
-            model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0",
-            tokenizer_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0",
-            max_new_tokens=512,
-            device_map="auto",
-            generate_kwargs={"temperature": 0.1, "do_sample": False},
-        )
-    else:
-        print("🌐 Использование LLM через Hugging Face Inference API...")
-        llm = HuggingFaceInferenceAPI(
-            model_name="mistralai/Mistral-7B-Instruct-v0.2",  # ✅ Стабильная версия
-            token=hf_token,
-            temperature=0.1,
-            max_new_tokens=512,
-        )
 
-    # ✅ Инициализация Embeddings
-    if use_local_embeddings:
-        print("🔄 Использование локальных эмбеддингов для тестов...")
-        embed_model = HuggingFaceEmbedding(
-            model_name="sentence-transformers/all-MiniLM-L6-v2",
-            cache_folder="./cache",
-            trust_remote_code=True,
-        )
-    else:
-        print("🌐 Использование эмбеддингов через Hugging Face Inference API...")
-        embed_model = HuggingFaceInferenceAPIEmbedding(
-            model_name="sentence-transformers/all-MiniLM-L6-v2",
-            token=hf_token,
-        )
+    print("🌐 Использование LLM через Hugging Face Inference API...")
+    llm = HuggingFaceInferenceAPI(
+        model_name="mistralai/Mistral-7B-Instruct-v0.2",  # ✅ Стабильная версия
+        token=hf_token,
+        temperature=0.1,
+        max_new_tokens=512,
+    )
+
+
+    print("🌐 Использование эмбеддингов через Hugging Face Inference API...")
+    embed_model = HuggingFaceInferenceAPIEmbedding(
+        model_name="sentence-transformers/all-MiniLM-L6-v2",
+        token=hf_token,
+    )
 
     Settings.llm = llm
     Settings.embed_model = embed_model
 
-    print(f"✅ LLM: {'Локальная' if use_local_llm else 'API'}")
-    print(f"✅ Embeddings: {'Локальные' if use_local_embeddings else 'API'}")
 
     return llm, embed_model
 
