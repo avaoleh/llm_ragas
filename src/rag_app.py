@@ -79,10 +79,10 @@ def get_llm_and_embedder():
     if not hf_token:
         raise ValueError("HF_TOKEN не найден в переменных окружения")
 
-    print("🌐 Использование LLM через Hugging Face Inference API...")
-    # Используем модель, которая точно поддерживается
+    print("🌐 Использование LLM через Hugging Face Inference API (text-generation)...")
+    # Используем модель для текстовой генерации вместо чата
     llm = HuggingFaceInferenceAPI(
-        model_name="HuggingFaceH4/zephyr-7b-beta",  # ✅ Поддерживаемая модель
+        model_name="mistralai/Mistral-7B-v0.1",  # ✅ Модель для text-generation
         token=hf_token,
         temperature=0.1,
         max_new_tokens=512,
