@@ -2,19 +2,21 @@ import os
 from llama_index.core import VectorStoreIndex, Document, Settings
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.llms.huggingface_api import HuggingFaceInferenceAPI
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.embeddings.huggingface_api import HuggingFaceInferenceAPIEmbedding
 import chromadb
+import nest_asyncio
 
+# ✅ Применяем nest_asyncio один раз при импорте
+nest_asyncio.apply()
 
-# ✅ Убрали nest_asyncio и event loop — больше не нужны!
 
 def get_llm_and_embedder():
-    """Инициализация LLM и эмбеддингов."""
+    """Инициализация LLM и эмбеддингов через Hugging Face Inference API."""
     hf_token = os.getenv("HF_TOKEN")
     if not hf_token:
         raise ValueError("HF_TOKEN не найден в переменных окружения")
 
-    # ✅ LLM через Inference API (остается асинхронным)
+    # ✅ LLM через Inference API
     print("🌐 Использование LLM через Hugging Face Inference API...")
     llm = HuggingFaceInferenceAPI(
         model_name="mistralai/Mistral-7B-Instruct-v0.1",
@@ -23,11 +25,11 @@ def get_llm_and_embedder():
         max_new_tokens=512
     )
 
-    # ✅ Embeddings локально через sentence-transformers (синхронно)
-    print("🔧 Использование локальных эмбеддингов (sentence-transformers)...")
-    embed_model = HuggingFaceEmbedding(
+    # ✅ Embeddings модель через Inference API
+    print("🌐 Использование эмбеддингов через Hugging Face Inference API...")
+    embed_model = HuggingFaceInferenceAPIEmbedding(
         model_name="sentence-transformers/all-MiniLM-L6-v2",
-        cache_folder="/tmp/cache"  # Кэш для CI/CD
+        token=hf_token
     )
 
     Settings.llm = llm
@@ -39,7 +41,7 @@ def build_rag_engine(data_path="src/data.txt"):
     """Строит RAG движок с ChromaDB."""
     llm, embed_model = get_llm_and_embedder()
 
-    # Ephemeral Chroma для тестов
+    # Ephemeral Chroma для тестов (не требует persistence)
     chroma_client = chromadb.EphemeralClient()
     chroma_collection = chroma_client.create_collection("rag_collection")
     vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
@@ -61,6 +63,6 @@ def build_rag_engine(data_path="src/data.txt"):
 
 def get_response(query_engine, question):
     """Получает ответ и контекст от RAG системы."""
-    # ✅ Никакой логики с event loop!
+    # ✅ Никакой логики с event loop — nest_asyncio применён глобально
     response = query_engine.query(question)
     return str(response), [node.node.text for node in response.source_nodes]

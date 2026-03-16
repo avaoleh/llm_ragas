@@ -1,23 +1,30 @@
-name: RAG CI/CD Pipeline
+name: RAG Tests with Ragas
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [main, master]
   pull_request:
-    branches: [ "main", "master" ]
+    branches: [main, master]
 
 jobs:
-  test-rag-quality:
+  test:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.10'
+
+    - name: Cache pip dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
 
     - name: Install dependencies
       run: |
@@ -33,27 +40,24 @@ jobs:
       run: |
         cat > pytest.ini << EOF
         [pytest]
-        pythonpath = .
         testpaths = tests
         python_files = test_*.py
-        addopts = -v --tb=short
+        python_functions = test_*
         EOF
 
     - name: Set PYTHONPATH
       run: echo "PYTHONPATH=${{ github.workspace }}" >> $GITHUB_ENV
 
-    - name: Run Ragas Tests
+    - name: Run tests with Ragas
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
       run: |
-        pwd
-        ls -la src/ tests/
-        pytest tests/test_ragas_eval.py -v -s --tb=short
+        pytest tests/test_ragas_eval.py -v -s
 
-    - name: Upload Ragas Results
-      if: always()
+    - name: Upload Ragas results
       uses: actions/upload-artifact@v4
+      if: always()
       with:
-        name: ragas-evaluation-report
+        name: ragas-results
         path: ragas_results.json
         retention-days: 7
